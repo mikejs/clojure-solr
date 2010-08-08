@@ -24,7 +24,7 @@
 (defn commit! [conn]
   (.commit conn))
 
-(defn doc-to-hash [doc]
+(defn- doc-to-hash [doc]
   (let [field-names (.getFieldNames doc)
         value-pairs (map #(list % (.getFieldValue doc %)) field-names)]
     (apply hash-map (flatten value-pairs))))
