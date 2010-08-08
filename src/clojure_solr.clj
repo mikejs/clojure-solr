@@ -40,3 +40,9 @@
     (doseq [[key value] (partition 2 flags)]
       (.setParam query (apply str (rest (str key))) (make-param value)))
     (map doc-to-hash (.getResults (.query conn query)))))
+
+(defn delete-id! [conn id]
+  (.deleteById conn id))
+
+(defn delete-query! [conn q]
+  (.deleteByQuery conn q))
