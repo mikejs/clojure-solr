@@ -6,7 +6,7 @@
 (defn connect [url]
   (CommonsHttpSolrServer. url))
 
-(defn make-document [doc]
+(defn- make-document [doc]
   (let [sdoc (SolrInputDocument.)]
     (doseq [[key value] doc]
       (let [key (cond
@@ -26,7 +26,14 @@
         value-pairs (map #(list % (.getFieldValue doc %)) field-names)]
     (apply hash-map (flatten value-pairs))))
 
-(defn search [conn q]
-  (let [query (SolrQuery.)]
-    (.setQuery query q)
+(defn- make-param [p]
+  (cond
+   (string? p) (into-array String [p])
+   (coll? p) (into-array String (map str p))
+   :else (into-array String [(str p)])))
+
+(defn search [conn q & flags]
+  (let [query (SolrQuery. q)]
+    (doseq [[key value] (partition 2 flags)]
+      (.setParam query (apply str (rest (str key))) (make-param value)))
     (map doc-to-hash (.getResults (.query conn query)))))
