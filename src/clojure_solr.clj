@@ -3,6 +3,8 @@
            (org.apache.solr.common SolrInputDocument)
            (org.apache.solr.client.solrj SolrQuery)))
 
+(declare *connection*)
+
 (defn connect [url]
   (CommonsHttpSolrServer. url))
 
@@ -15,14 +17,14 @@
         (.addField sdoc key value)))
     sdoc))
 
-(defn add-document! [conn doc]
-  (.add conn (make-document doc)))
+(defn add-document! [doc]
+  (.add *connection* (make-document doc)))
 
-(defn add-documents! [conn coll]
-  (.add conn (to-array (map make-document coll))))
+(defn add-documents! [coll]
+  (.add *connection* (to-array (map make-document coll))))
 
-(defn commit! [conn]
-  (.commit conn))
+(defn commit! []
+  (.commit *connection*))
 
 (defn- doc-to-hash [doc]
   (let [field-names (.getFieldNames doc)
@@ -35,14 +37,18 @@
    (coll? p) (into-array String (map str p))
    :else (into-array String [(str p)])))
 
-(defn search [conn q & flags]
+(defn search [q & flags]
   (let [query (SolrQuery. q)]
     (doseq [[key value] (partition 2 flags)]
       (.setParam query (apply str (rest (str key))) (make-param value)))
-    (map doc-to-hash (.getResults (.query conn query)))))
+    (map doc-to-hash (.getResults (.query *connection* query)))))
 
-(defn delete-id! [conn id]
-  (.deleteById conn id))
+(defn delete-id! [id]
+  (.deleteById *connection* id))
 
-(defn delete-query! [conn q]
-  (.deleteByQuery conn q))
+(defn delete-query! [q]
+  (.deleteByQuery *connection* q))
+
+(defmacro with-connection [conn & body]
+  `(binding [*connection* ~conn]
+     ~@body))
