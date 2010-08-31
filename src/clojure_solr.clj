@@ -1,7 +1,8 @@
 (ns clojure-solr
   (:import (org.apache.solr.client.solrj.impl CommonsHttpSolrServer)
            (org.apache.solr.common SolrInputDocument)
-           (org.apache.solr.client.solrj SolrQuery)))
+           (org.apache.solr.client.solrj SolrQuery)
+           (org.apache.solr.common.params ModifiableSolrParams)))
 
 (declare *connection*)
 
@@ -48,6 +49,14 @@
 
 (defn delete-query! [q]
   (.deleteByQuery *connection* q))
+
+(defn data-import [type]
+  (let [type (cond (= type :full) "full-import"
+                   (= type :delta) "delta-import")
+        params (doto (ModifiableSolrParams.)
+                 (.set "qt" (make-param "/dataimport"))
+                 (.set "command" (make-param type)))]
+    (.query *connection* params)))
 
 (defmacro with-connection [conn & body]
   `(binding [*connection* ~conn]
