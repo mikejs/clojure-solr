@@ -2,7 +2,7 @@
 clojure-solr
 ============
 
-Clojure bindings for `Apache Solr <http://lucene.apache.org/solr/>`_.
+Clojure bindings for `Apache Solr 3.5.0 <http://lucene.apache.org/solr/>`_.
 
 Installation
 ============
