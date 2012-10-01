@@ -3,3 +3,4 @@
 lib/
 .cake/
 pom.xml
+target/*
